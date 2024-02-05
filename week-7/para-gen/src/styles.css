@@ -1,0 +1,28 @@
+#p-gen {
+    width: fit-content;
+    margin: 100px auto;
+    text-align: center;
+    font-family: cursive;
+  }
+  #p-gen div {
+    margin-top: 20px;
+  }
+  #p-gen input {
+    width: 300px;
+    height: 30px;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid black;
+  }
+  #p-gen button {
+    background-color: rgb(44, 44, 44);
+    color: white;
+    padding: 13px 20px;
+    border-radius: 8px;
+    margin-left: 10px;
+    border: 0;
+    cursor: pointer;
+  }
+  #para {
+    margin: 0 80px;
+  }
