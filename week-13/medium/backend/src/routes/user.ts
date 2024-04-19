@@ -14,7 +14,7 @@ export const userRouter= new Hono<{
 userRouter.post('/signup',async (c)=>{
     const body = await c.req.json();
     const {success} = signupInput.safeParse(body);
-
+    
     if(!success){
     c.status(411)
     return c.json({msg:"wrong input"})
@@ -33,7 +33,7 @@ userRouter.post('/signup',async (c)=>{
       })
       const token =await sign({id:user.id},c.env.JWT_SECRET)
       return c.json({
-        jwt : token
+        token
       })
     }
     catch(e){
@@ -65,9 +65,9 @@ userRouter.post('/signup',async (c)=>{
         msg:"User does not exist"
       })
     }
-    const token =await sign({id:user.id},c.env.JWT_SECRET)
+    const jwt =await sign({id:user.id},c.env.JWT_SECRET)
     return c.json({
-      jwt : token
+      jwt
     })
   })
   

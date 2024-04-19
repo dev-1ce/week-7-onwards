@@ -78,7 +78,18 @@ blogRouter.put('/',async(c)=>{
         datasourceUrl: c.env.DATABASE_URL,
       }).$extends(withAccelerate())
 
-      const blogs = await prisma.posts.findMany();
+      const blogs = await prisma.posts.findMany({
+        select : {
+          title:true,
+          content:true,
+          id:true,
+          author :{
+            select: {
+              name :true
+            }
+          }
+        }
+      });
 
     return c.json({blogs})
   })
@@ -93,6 +104,15 @@ blogRouter.get('/:id',async (c)=>{
         where:{
             id:id
         },
+        select:{
+          title:true,
+          content:true,
+          author:{
+            select:{
+              name:true
+            }
+          }
+        }
       })
     return c.json({blog})
   })
