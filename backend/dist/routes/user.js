@@ -17,20 +17,17 @@ const JWT_SECRET = "harkirat";
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 exports.userRouter.use(express.json());
-function userFind(_a) {
-    return __awaiter(this, arguments, void 0, function* ({ email, password }) {
-        const user = yield prisma.user.findFirst({
-            where: {
-                email,
-            },
-        });
-        if (!user) {
-            return "user not found";
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    console.log(token);
+    if (!token)
+        return res.sendStatus(401);
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.sendStatus(403);
         }
-        if (user.password !== password) {
-            return "incorrect password";
-        }
-        return "user signed in";
+        next();
     });
 }
 exports.userRouter.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -60,17 +57,23 @@ exports.userRouter.post("/signup", (req, res) => __awaiter(void 0, void 0, void 
     });
 }));
 exports.userRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, name, password } = req.body;
+    const { email, password } = req.body;
     const user = yield prisma.user.findFirst({
         where: {
             email,
         },
     });
     if (!user) {
-        return "user not found";
+        res.json({
+            msg: "User not found",
+        });
+        return;
     }
     if (user.password !== password) {
-        return "incorrect password";
+        res.json({
+            msg: "incorrect Password",
+        });
+        return;
     }
     if (user) {
         const token = jwt.sign({
@@ -85,3 +88,6 @@ exports.userRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 
         message: "Error while logging in",
     });
 }));
+exports.userRouter.get("/verify", authenticateToken, (req, res) => {
+    res.json({ message: "This is a protected route" });
+});

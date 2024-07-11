@@ -9,9 +9,21 @@ const prisma = new PrismaClient();
 
 userRouter.use(express.json());
 
+
+function authenticateToken(req: any, res: any, next: any) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) return res.sendStatus(401);
+  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    if (err) {
+      return res.sendStatus(403);
+    }
+    next();
+  });
+}
+
 userRouter.post("/signup", async (req: any, res: any) => {
   const { email, name, password } = req.body;
-
   const id = await prisma.user.findFirst({
     where: {
       email,
@@ -43,7 +55,7 @@ userRouter.post("/signup", async (req: any, res: any) => {
 });
 
 userRouter.post("/signin", async (req: any, res: any) => {
-  const { email, name, password } = req.body;
+  const { email, password } = req.body;
 
   const user = await prisma.user.findFirst({
     where: {
@@ -52,11 +64,17 @@ userRouter.post("/signin", async (req: any, res: any) => {
   });
 
   if (!user) {
-    return "user not found";
+    res.json({
+      msg: "User not found",
+    });
+    return;
   }
 
   if (user.password !== password) {
-    return "incorrect password";
+    res.json({
+      msg: "incorrect Password",
+    });
+    return;
   }
   if (user) {
     const token = jwt.sign(
@@ -75,4 +93,8 @@ userRouter.post("/signin", async (req: any, res: any) => {
   res.status(411).json({
     message: "Error while logging in",
   });
+});
+
+userRouter.get("/verify", authenticateToken, (req: any, res: any) => {
+  res.json({ message: "This is a protected route" });
 });
